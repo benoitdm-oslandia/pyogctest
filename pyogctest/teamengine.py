@@ -42,6 +42,7 @@ class Teamengine(object):
     def start(self):
         self.stop()
 
+        nproc_limit = docker.types.Ulimit(name='nofile', soft=8096, hard=8096)
         client = docker.from_env()
         if self.network:
             client.containers.run(
@@ -51,10 +52,11 @@ class Teamengine(object):
                 name=NAME,
                 remove=True,
                 network=self.network,
+                ulimits=[nproc_limit],
             )
         else:
             client.containers.run(
-                self.image, detach=True, ports={8080: self.port}, name=NAME, remove=True
+                self.image, detach=True, ports={8080: self.port}, name=NAME, remove=True, ulimits=[nproc_limit]
             )
         time.sleep(5)  # teamengine takes some time to start
 
